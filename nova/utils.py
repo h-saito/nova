@@ -29,6 +29,7 @@ import os
 import pyclbr
 import random
 import re
+import shlex
 import shutil
 import signal
 import socket
@@ -83,6 +84,9 @@ utils_opts = [
     cfg.StrOpt('tempdir',
                default=None,
                help='Explicitly specify the temporary working directory'),
+    cfg.StrOpt('root_helper',
+               default='',
+               help='Root helper application.'),
 ]
 CONF = cfg.CONF
 CONF.register_opts(monkey_patch_opts)
@@ -198,7 +202,7 @@ def execute(*cmd, **kwargs):
                                         'to utils.execute: %r') % kwargs)
 
     if run_as_root and os.geteuid() != 0:
-        cmd = ['sudo', 'nova-rootwrap', CONF.rootwrap_config] + list(cmd)
+        cmd = shlex.split(CONF.root_helper) + list(cmd)
 
     cmd = map(str, cmd)
 
